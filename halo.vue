@@ -1,5 +1,5 @@
 <template>
-    <div class="halo-widget" :class="['size-'+size, 'theme-'+theme]" v-drag>
+    <div class="halo-widget" :class="['size-'+size, 'theme-'+theme]" v-halo="onHaloEv">
 
     </div>
 </template>
@@ -9,7 +9,7 @@
   export default {
     name: "halo",
     directives: {
-      drag: directive
+      halo: directive
     },
     props: {
       size: {
@@ -20,17 +20,26 @@
         type: String,
         default: () => 'default'
       }
+    },
+    methods: {
+      onHaloEv({state}) {
+        switch (state) {
+          case 'START':
+            console.log(state)
+            break;
+          case 'MOVE':
+            console.log(state)
+            break;
+          case 'END':
+            console.log(state)
+        }
+      }
     }
   }
 </script>
 
 <style scoped lang="scss">
     .halo-widget {
-        position: fixed;
-        /*left: 80vw;*/
-        /*top: 60vh;*/
-        left: 0;
-        top: 0;
         border-radius: 50%;
 
         &.size-small {}

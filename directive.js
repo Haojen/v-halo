@@ -1,7 +1,22 @@
 const Edge = 2
 
+const START = 'START',
+      MOVE = 'MOVE',
+      END = 'END'
+
 class Dragtive {
-  constructor(element) {
+  constructor(element, binding) {
+    console.log(binding, 'binding')
+    const haloX = localStorage.getItem('HALO_POSITION_X') || 0,
+          haloY = localStorage.getItem('HALO_POSITION_Y') || 0
+
+    element.style.position = 'fixed'
+    element.style.top = 0
+    element.style.left = 0
+
+    element.style.transform = `
+        translate(${haloX}px,${haloY}px) 
+      `
 
     element.ontouchstart = ev => {
       const {width, height} = element.getBoundingClientRect()
@@ -9,6 +24,9 @@ class Dragtive {
       this.elHeight = height
       this.widthCenter = width / 2
       this.heightCenter = height / 2
+      element.style.transition = 'none'
+
+      binding.value && binding.value({state: START})
     }
 
     element.ontouchmove = ev => {
@@ -26,6 +44,7 @@ class Dragtive {
       element.style.transform = `
         translate(${pageX.toFixed() - widthCenter}px,${pageY.toFixed() - heightCenter}px) 
       `
+      binding.value && binding.value({state: MOVE})
     }
 
     element.ontouchend = ev => {
@@ -47,17 +66,24 @@ class Dragtive {
         (pageY > innerHeight - 50 && (haloX = pageX - widthCenter) && innerHeight - this.elHeight - Edge ) || pageY - heightCenter;
 
 
+
+      element.style.transition = 'transform 0.4s'
       element.style.transform = `
         translate(${haloX}px,${haloY}px) 
       `
+
+      // cache
+      localStorage.setItem('HALO_POSITION_X', haloX)
+      localStorage.setItem('HALO_POSITION_Y', haloY)
+
+      binding.value && binding.value({state: END})
     }
 
   }
 }
 
-
 export default {
   inserted(el, binding) {
-    new Dragtive(el)
+    new Dragtive(el, binding)
   },
 }
