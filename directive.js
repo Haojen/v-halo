@@ -1,4 +1,5 @@
-const Edge = 2
+const Edge = 2,
+      TRIGGER = 5
 
 const START = 'START',
       MOVE = 'MOVE',
@@ -6,7 +7,6 @@ const START = 'START',
 
 class Dragtive {
   constructor(element, binding) {
-    console.log(binding, 'binding')
     const haloX = localStorage.getItem('HALO_POSITION_X') || 0,
           haloY = localStorage.getItem('HALO_POSITION_Y') || 0
 
@@ -19,24 +19,26 @@ class Dragtive {
       `
 
     element.ontouchstart = ev => {
-      const {width, height} = element.getBoundingClientRect()
+      binding.value && binding.value({state: START})
+
+      const {width, height, x, y} = element.getBoundingClientRect()
       this.elWidth = width
       this.elHeight = height
       this.widthCenter = width / 2
       this.heightCenter = height / 2
-      element.style.transition = 'none'
-
-      binding.value && binding.value({state: START})
+      this.moveing = false
     }
 
     element.ontouchmove = ev => {
       event.preventDefault()
+      binding.value && binding.value({state: MOVE})
 
+      this.moveing = true
+
+      let {pageX, pageY} = ev.targetTouches[0]
 
       const widthCenter = this.widthCenter,
             heightCenter = this.heightCenter
-
-      let {pageX, pageY} = ev.targetTouches[0]
 
       pageX = (pageX + widthCenter > innerWidth && (innerWidth - widthCenter - Edge)) || (pageX < widthCenter && (widthCenter + Edge)) || pageX
       pageY = (pageY + heightCenter > innerHeight && (innerHeight - heightCenter - Edge)) || (pageY< heightCenter && (heightCenter + Edge)) || pageY
@@ -44,10 +46,13 @@ class Dragtive {
       element.style.transform = `
         translate(${pageX.toFixed() - widthCenter}px,${pageY.toFixed() - heightCenter}px) 
       `
-      binding.value && binding.value({state: MOVE})
     }
 
     element.ontouchend = ev => {
+      binding.value && binding.value({state: END})
+
+      if (!this.moveing) return;
+
       const widthCenter = this.widthCenter,
             heightCenter = this.heightCenter
 
@@ -65,9 +70,6 @@ class Dragtive {
           haloY = (pageY < 50 && (haloX = pageX - widthCenter) && Edge ) ||
         (pageY > innerHeight - 50 && (haloX = pageX - widthCenter) && innerHeight - this.elHeight - Edge ) || pageY - heightCenter;
 
-
-
-      element.style.transition = 'transform 0.4s'
       element.style.transform = `
         translate(${haloX}px,${haloY}px) 
       `
@@ -75,8 +77,6 @@ class Dragtive {
       // cache
       localStorage.setItem('HALO_POSITION_X', haloX)
       localStorage.setItem('HALO_POSITION_Y', haloY)
-
-      binding.value && binding.value({state: END})
     }
 
   }
@@ -87,3 +87,12 @@ export default {
     new Dragtive(el, binding)
   },
 }
+
+// 设置一个触发拖动的值
+// const spacingX = this.beginX - pageX,
+//   spacingY = this.beginY - pageY;
+//
+// console.log(spacingX, 'x', spacingY, 'y')
+//
+// const fire = spacingX > TRIGGER || spacingX < 0 - TRIGGER
+// const fire2 = spacingY > TRIGGER || spacingY < 0 - TRIGGER

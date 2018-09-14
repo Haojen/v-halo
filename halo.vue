@@ -1,6 +1,6 @@
 <template>
-    <div class="halo-widget" :class="['size-'+size, 'theme-'+theme]" v-halo="onHaloEv">
-
+    <div class="halo-widget"
+         :class="['size-'+size, 'theme-'+theme, active]" v-halo="onHaloEv">
     </div>
 </template>
 
@@ -10,6 +10,11 @@
     name: "halo",
     directives: {
       halo: directive
+    },
+    data() {
+      return {
+        active: null,
+      }
     },
     props: {
       size: {
@@ -25,13 +30,12 @@
       onHaloEv({state}) {
         switch (state) {
           case 'START':
-            console.log(state)
+            this.active = 'active'
             break;
           case 'MOVE':
-            console.log(state)
             break;
           case 'END':
-            console.log(state)
+            this.active = 'inactive'
         }
       }
     }
@@ -50,8 +54,33 @@
         &.size-large {}
 
         &.theme-default {
-            border: 2px solid red;
-            background: #000;
+            $color1: rgb(224,224,224);
+            $color2: rgb(238,238,238);
+            $color3: rgb(245,245,245);
+            /*border: 10px solid red;*/
+            background: $color1;
+            box-shadow: inset 0 0 0 7px $color2, 0 0 0 6px $color3;
+
+            &.active {
+                $color1: rgb(158,158,158);
+                $color2: rgb(189,189,189);
+                $color3: rgb(224,224,224);
+
+                width: 55px;
+                height: 55px;
+                transition: background-color .8s, box-shadow .8s, width .8s, height .8s;
+
+                background: $color1;
+                box-shadow: inset 0 0 0 7px $color2, 0 0 0 6px $color3;
+            }
+
+            &.inactive {
+                transition: background-color .8s,
+                            box-shadow .8s,
+                            width .8s,
+                            height .8s,
+                            transform .4s;
+            }
         }
     }
 </style>
